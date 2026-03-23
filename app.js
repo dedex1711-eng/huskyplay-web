@@ -7,10 +7,6 @@ if (!SERVER) { location.href = 'index.html'; }
 const api = (action, extra = '') =>
   `${SERVER}/player_api.php?username=${encodeURIComponent(USER)}&password=${encodeURIComponent(PASS)}&action=${action}${extra}`;
 
-const PROXY = 'https://fancy-feather-6974.alanadianabrito22.workers.dev/?url=';
-const proxyUrl = url => location.protocol === 'https:' ? PROXY + encodeURIComponent(url) : url;
-
-
 const ESPN_API     = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 
 // ── Profile-scoped storage keys ───────────────────────────────────────────────
@@ -1945,7 +1941,7 @@ function showLoading(show, page) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 async function fetchJson(url) {
-  const res = await fetch(proxyUrl(url));
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -1953,7 +1949,7 @@ async function fetchJsonTimeout(url, ms = 30000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const res = await fetch(proxyUrl(url), { signal: ctrl.signal });
+    const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   } finally { clearTimeout(timer); }
