@@ -384,10 +384,10 @@ input { font-family: inherit; }
 .splash-bar { height: 100%; width: 0%; background: var(--accent-gold); border-radius: 2px; box-shadow: 0 0 10px rgba(255,183,3,.8); transition: width .4s ease; }
 
 /* ── Netflix-style Profile Selector ── */
-.nf-profile-overlay { position: fixed; inset: 0; background: #141414; z-index: 600; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s ease; }
+.nf-profile-overlay { position: fixed; inset: 0; background: #141414; z-index: 600; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; opacity: 0; transition: opacity .3s ease; }
 .nf-profile-overlay.nf-visible { opacity: 1; }
 .nf-profile-overlay.nf-fade-out { opacity: 0; }
-.nf-profile-screen { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px 20px; }
+.nf-profile-screen { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px 20px; margin: auto; }
 .nf-profile-logo { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
 .nf-profile-logo .husky { font-size: 2rem; font-weight: 700; color: var(--accent-cyan); text-shadow: 0 0 15px rgba(0,212,255,.6); }
 .nf-profile-logo .play-text { font-size: 2rem; font-weight: 700; color: var(--accent-gold); text-shadow: 0 0 20px rgba(255,183,3,.8); }
