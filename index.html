@@ -58,16 +58,26 @@
 
     async function tryLogin(server, user, pass) {
       const url = `${server}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`;
-      // If page is HTTPS, route through CORS proxy to avoid mixed content block
-      const fetchUrl = location.protocol === 'https:'
-        ? `https://corsproxy.io/?${encodeURIComponent(url)}`
-        : url;
-      const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) return null;
-      const data = await res.json();
-      // corsproxy wraps response in {contents:...} for some endpoints — handle both
-      const info = data.user_info || (data.contents && JSON.parse(data.contents).user_info);
-      if (info && info.auth == 1) return { server, expiry: info.exp_date };
+      const isHttps = location.protocol === 'https:';
+      // Try direct first, then proxies if blocked
+      const attempts = isHttps
+        ? [
+            `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+            `https://corsproxy.io/?${encodeURIComponent(url)}`
+          ]
+        : [url];
+      for (const fetchUrl of attempts) {
+        try {
+          const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
+          if (!res.ok) continue;
+          const raw = await res.json();
+          // allorigins wraps in {contents: "..."}
+          const data = raw.contents ? JSON.parse(raw.contents) : raw;
+          if (data.user_info && data.user_info.auth == 1) {
+            return { server, expiry: data.user_info.exp_date };
+          }
+        } catch {}
+      }
       return null;
     }
 
