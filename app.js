@@ -1953,7 +1953,7 @@ async function fetchJsonTimeout(url, ms = 30000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
+    const res = await fetch(proxyUrl(url), { signal: ctrl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   } finally { clearTimeout(timer); }
