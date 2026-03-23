@@ -2535,7 +2535,7 @@ function showForceCreateProfile(onDone) {
   overlay.className = 'nf-profile-overlay nf-visible';
   overlay.style.zIndex = '800';
   overlay.innerHTML = `
-    <div class="nf-profile-screen" style="max-width:480px;width:90%;">
+    <div class="nf-profile-screen" style="max-width:480px;width:90%;max-height:90vh;overflow-y:auto;">
       <div class="nf-profile-logo">
         <span class="husky">Husky</span><span class="play-text">Play</span>
         <div class="play-icon"><svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg></div>
