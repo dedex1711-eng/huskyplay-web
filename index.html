@@ -44,17 +44,32 @@
     if (_savedPass) document.getElementById('password').value = _savedPass;
 
     const SERVERS = [
-      'server10.fun:80',
-      'zeroum.blog:80',
-      'pbkdiamond.site:80',
-      'cdn.vr766.com:80',
-      'pbklite.site:80',
-      'zilgringo.site:80',
-      'gowpm.sbs',
-      'blackouro.fun',
-      'blackrubi.shop',
-      'blackcyber.site'
+      'http://fonteblack.sbs',
+      'http://zeroum.blog:80',
+      'http://pbkdiamond.site:80',
+      'http://blackcyber.site',
+      'http://gowpm.sbs',
+      'http://cdn.vr766.com:80',
+      'http://pbklite.site:80',
+      'http://zilgringo.site:80',
+      'http://blackouro.fun',
+      'http://blackrubi.shop'
     ];
+
+    async function tryLogin(server, user, pass) {
+      const url = `${server}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`;
+      // If page is HTTPS, route through CORS proxy to avoid mixed content block
+      const fetchUrl = location.protocol === 'https:'
+        ? `https://corsproxy.io/?${encodeURIComponent(url)}`
+        : url;
+      const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) return null;
+      const data = await res.json();
+      // corsproxy wraps response in {contents:...} for some endpoints — handle both
+      const info = data.user_info || (data.contents && JSON.parse(data.contents).user_info);
+      if (info && info.auth == 1) return { server, expiry: info.exp_date };
+      return null;
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
@@ -66,26 +81,15 @@
       btn.disabled = true;
       err.classList.add('hidden');
 
-      // Build server list: prefer HTTPS, fallback to HTTP only if page is also HTTP
-      const isHttps = location.protocol === 'https:';
-      const serverList = [];
-      for (const s of SERVERS) {
-        serverList.push(`https://${s}`);
-        if (!isHttps) serverList.push(`http://${s}`);
-      }
-
-      for (let i = 0; i < serverList.length; i++) {
-        const server = serverList[i];
-        btn.textContent = `Conectando... (${i + 1}/${serverList.length})`;
+      for (let i = 0; i < SERVERS.length; i++) {
+        btn.textContent = `Conectando... (${i + 1}/${SERVERS.length})`;
         try {
-          const res  = await fetch(`${server}/player_api.php?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`, { signal: AbortSignal.timeout(6000) });
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data.user_info && data.user_info.auth == 1) {
-            localStorage.setItem('hp_server', server);
+          const result = await tryLogin(SERVERS[i], user, pass);
+          if (result) {
+            localStorage.setItem('hp_server', result.server);
             localStorage.setItem('hp_user', user);
             localStorage.setItem('hp_pass', pass);
-            if (data.user_info.exp_date) localStorage.setItem('hp_expiry', data.user_info.exp_date);
+            if (result.expiry) localStorage.setItem('hp_expiry', result.expiry);
             location.href = 'app.html';
             return;
           }
